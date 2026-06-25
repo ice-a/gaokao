@@ -33,19 +33,85 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
             <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">各省份高校数量</h2>
-                <canvas id="provinceChart"></canvas>
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📈 全国高考报名人数趋势</h2>
+                <canvas id="nationalChart"></canvas>
+                <p class="text-xs text-gray-400 mt-2">单位：万人</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">主管部门分布 TOP 15</h2>
-                <canvas id="deptChart"></canvas>
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📊 各省份高校数量</h2>
+                <canvas id="provinceChart"></canvas>
             </div>
         </div>
 
-        <div class="mt-4 md:mt-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
-            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">省份高校数量明细</h2>
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6 md:mb-8">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">🏫 主管部门分布 TOP 15</h2>
+            <canvas id="deptChart"></canvas>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6 md:mb-8">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">👥 2025年各省高考人数</h2>
+            <canvas id="provinceExamChart"></canvas>
+            <p class="text-xs text-gray-400 mt-2">单位：万人</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📈 人口大省高考人数趋势</h2>
+                <canvas id="topProvinceTrend"></canvas>
+                <p class="text-xs text-gray-400 mt-2">单位：万人</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📉 人口小省高考人数趋势</h2>
+                <canvas id="smallProvinceTrend"></canvas>
+                <p class="text-xs text-gray-400 mt-2">单位：万人</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-6 md:mb-8">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">🗺️ 各省高考人数明细</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs md:text-sm">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-2 px-2 text-gray-500">省份</th>
+                            <th class="text-right py-2 px-2 text-gray-500">2025</th>
+                            <th class="text-right py-2 px-2 text-gray-500">2024</th>
+                            <th class="text-right py-2 px-2 text-gray-500">2023</th>
+                            <th class="text-right py-2 px-2 text-gray-500">2022</th>
+                            <th class="text-right py-2 px-2 text-gray-500">2021</th>
+                            <th class="text-right py-2 px-2 text-gray-500">趋势</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% examData.provinces.sort((a, b) => b.data[7] - a.data[7]).forEach(p => { %>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-2 px-2 font-medium"><%= p.name %></td>
+                            <td class="py-2 px-2 text-right font-semibold text-blue-600"><%= p.data[7] %></td>
+                            <td class="py-2 px-2 text-right"><%= p.data[6] %></td>
+                            <td class="py-2 px-2 text-right"><%= p.data[5] %></td>
+                            <td class="py-2 px-2 text-right"><%= p.data[4] %></td>
+                            <td class="py-2 px-2 text-right"><%= p.data[3] %></td>
+                            <td class="py-2 px-2 text-right">
+                                <% const trend = p.data[7] - p.data[6]; %>
+                                <% if (trend > 0) { %>
+                                <span class="text-red-500">↑<%= trend.toFixed(1) %></span>
+                                <% } else if (trend < 0) { %>
+                                <span class="text-green-500">↓<%= Math.abs(trend).toFixed(1) %></span>
+                                <% } else { %>
+                                <span class="text-gray-400">-</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📍 各省高校数量</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 text-sm">
                 <% provinces.forEach(p => { %>
                 <a href="/schools?province=<%= p._id %>" class="flex justify-between items-center px-3 py-2 bg-gray-50 rounded-lg hover:bg-blue-50">
@@ -58,8 +124,37 @@
     </main>
 
     <script>
+    const examData = <%- JSON.stringify(examData) %>;
     const provinces = <%- JSON.stringify(provinces.slice(0, 20)) %>;
     const departments = <%- JSON.stringify(departments.slice(0, 15)) %>;
+
+    const colors = [
+        '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E',
+        '#F97316', '#EAB308', '#22C55E', '#14B8A6', '#06B6D4',
+        '#0EA5E9', '#A855F7', '#D946EF', '#F472B6', '#FB923C',
+    ];
+
+    new Chart(document.getElementById('nationalChart'), {
+        type: 'line',
+        data: {
+            labels: examData.years,
+            datasets: [{
+                label: '全国报名人数',
+                data: examData.national,
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: '#3B82F6',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: false } }
+        }
+    });
 
     new Chart(document.getElementById('provinceChart'), {
         type: 'bar',
@@ -86,16 +181,72 @@
             labels: departments.map(d => d._id),
             datasets: [{
                 data: departments.map(d => d.count),
-                backgroundColor: [
-                    '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E',
-                    '#F97316', '#EAB308', '#22C55E', '#14B8A6', '#06B6D4',
-                    '#0EA5E9', '#A855F7', '#D946EF', '#F472B6', '#FB923C',
-                ],
+                backgroundColor: colors,
             }]
         },
         options: {
             responsive: true,
             plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+        }
+    });
+
+    const sorted2025 = [...examData.provinces].sort((a, b) => b.data[7] - a.data[7]).slice(0, 20);
+    new Chart(document.getElementById('provinceExamChart'), {
+        type: 'bar',
+        data: {
+            labels: sorted2025.map(p => p.name),
+            datasets: [{
+                label: '2025年报名人数',
+                data: sorted2025.map(p => p.data[7]),
+                backgroundColor: sorted2025.map((_, i) => colors[i % colors.length]),
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const topProvinces = ['河南', '山东', '广东', '四川', '河北'];
+    const topData = examData.provinces.filter(p => topProvinces.includes(p.name));
+    new Chart(document.getElementById('topProvinceTrend'), {
+        type: 'line',
+        data: {
+            labels: examData.years,
+            datasets: topData.map((p, i) => ({
+                label: p.name,
+                data: p.data,
+                borderColor: colors[i],
+                tension: 0.3,
+                pointRadius: 3,
+            }))
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+            scales: { y: { beginAtZero: false } }
+        }
+    });
+
+    const smallProvinces = ['北京', '上海', '天津', '西藏', '青海'];
+    const smallData = examData.provinces.filter(p => smallProvinces.includes(p.name));
+    new Chart(document.getElementById('smallProvinceTrend'), {
+        type: 'line',
+        data: {
+            labels: examData.years,
+            datasets: smallData.map((p, i) => ({
+                label: p.name,
+                data: p.data,
+                borderColor: colors[i],
+                tension: 0.3,
+                pointRadius: 3,
+            }))
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+            scales: { y: { beginAtZero: false } }
         }
     });
     </script>

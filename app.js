@@ -8,16 +8,12 @@ let marked;
 try {
   marked = require('marked').marked;
 } catch (e) {
-  console.error('marked import error:', e);
   marked = (text) => text;
 }
 
 const app = express();
 
 const viewsPath = path.join(process.cwd(), 'views');
-console.log('Views path:', viewsPath);
-console.log('CWD:', process.cwd());
-
 app.set('view engine', 'ejs');
 app.set('views', viewsPath);
 
@@ -26,7 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const publicPath = path.join(process.cwd(), 'public');
-console.log('Public path:', publicPath);
 app.use(express.static(publicPath));
 
 app.use((req, res, next) => {
@@ -35,7 +30,6 @@ app.use((req, res, next) => {
     try {
       return marked(text, { breaks: true, gfm: true });
     } catch (e) {
-      console.error('Markdown parse error:', e);
       return text;
     }
   };
@@ -52,6 +46,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', env: process.env.VERCEL ? 'vercel' : 'local' });
 });
 
+const indexRouter = require('./routes/index');
+const schoolsRouter = require('./routes/schools');
+const statsRouter = require('./routes/stats');
+const compareRouter = require('./routes/compare');
+
 app.use((req, res, next) => {
   try {
     if (req.path === '/login' || req.path === '/api/login' || req.path === '/api/health') return next();
@@ -66,8 +65,8 @@ app.use((req, res, next) => {
 
     return res.render('login', { error: null });
   } catch (e) {
-    console.error('Auth middleware error:', e);
-    return res.status(500).send('服务器错误: ' + e.message);
+    console.error('Auth error:', e);
+    return res.status(500).send('服务器错误');
   }
 });
 
@@ -75,8 +74,7 @@ app.get('/login', (req, res) => {
   try {
     res.render('login', { error: null });
   } catch (e) {
-    console.error('Login page error:', e);
-    res.status(500).send('登录页错误: ' + e.message);
+    res.status(500).send('错误: ' + e.message);
   }
 });
 
@@ -91,10 +89,9 @@ app.post('/login', (req, res) => {
       });
       return res.redirect('/');
     }
-    res.render('login', { error: '密码错误，请重试' });
+    res.render('login', { error: '密码错误' });
   } catch (e) {
-    console.error('Login error:', e);
-    res.status(500).send('登录错误: ' + e.message);
+    res.status(500).send('错误: ' + e.message);
   }
 });
 
@@ -103,37 +100,10 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-try {
-  console.log('Loading routes/index...');
-  app.use('/', require('./routes/index'));
-  console.log('Loaded routes/index');
-} catch (e) {
-  console.error('routes/index error:', e.message);
-}
-
-try {
-  console.log('Loading routes/schools...');
-  app.use('/schools', require('./routes/schools'));
-  console.log('Loaded routes/schools');
-} catch (e) {
-  console.error('routes/schools error:', e.message);
-}
-
-try {
-  console.log('Loading routes/stats...');
-  app.use('/stats', require('./routes/stats'));
-  console.log('Loaded routes/stats');
-} catch (e) {
-  console.error('routes/stats error:', e.message);
-}
-
-try {
-  console.log('Loading routes/compare...');
-  app.use('/compare', require('./routes/compare'));
-  console.log('Loaded routes/compare');
-} catch (e) {
-  console.error('routes/compare error:', e.message);
-}
+app.use('/', indexRouter);
+app.use('/schools', schoolsRouter);
+app.use('/stats', statsRouter);
+app.use('/compare', compareRouter);
 
 app.use((req, res) => {
   try {
@@ -145,7 +115,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error('Global error:', err);
-  res.status(500).send('服务器错误: ' + err.message);
+  res.status(500).send('服务器错误');
 });
 
 module.exports = app;
