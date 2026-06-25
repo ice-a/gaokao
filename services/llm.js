@@ -1,14 +1,25 @@
 const OpenAI = require('openai');
 const config = require('../config');
 
-const client = new OpenAI({
-  apiKey: config.llm.apiKey,
-  baseURL: config.llm.baseURL,
-});
+let client;
+
+function getClient() {
+  if (!client && config.llm.apiKey) {
+    client = new OpenAI({
+      apiKey: config.llm.apiKey,
+      baseURL: config.llm.baseURL,
+    });
+  }
+  return client;
+}
 
 async function callLLM(prompt) {
   try {
-    const resp = await client.chat.completions.create({
+    const llmClient = getClient();
+    if (!llmClient) {
+      return 'AI 功能未配置，请设置 LLM_API_KEY 环境变量';
+    }
+    const resp = await llmClient.chat.completions.create({
       model: config.llm.model,
       messages: [
         {
@@ -29,7 +40,9 @@ async function callLLM(prompt) {
 
 async function callLLMJson(prompt) {
   try {
-    const resp = await client.chat.completions.create({
+    const llmClient = getClient();
+    if (!llmClient) return null;
+    const resp = await llmClient.chat.completions.create({
       model: config.llm.model,
       messages: [
         {
