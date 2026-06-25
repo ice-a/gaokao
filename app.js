@@ -2,26 +2,40 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
-const { marked } = require('marked');
 const config = require('./config');
+
+let marked;
+try {
+  marked = require('marked').marked;
+} catch (e) {
+  console.error('marked import error:', e);
+  marked = (text) => text;
+}
 
 const app = express();
 
 const viewsPath = path.join(process.cwd(), 'views');
+console.log('Views path:', viewsPath);
+console.log('CWD:', process.cwd());
+
 app.set('view engine', 'ejs');
 app.set('views', viewsPath);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(process.cwd(), 'public')));
+
+const publicPath = path.join(process.cwd(), 'public');
+console.log('Public path:', publicPath);
+app.use(express.static(publicPath));
 
 app.use((req, res, next) => {
   res.locals.md = (text) => {
     if (!text) return '';
     try {
-      return marked.parse(text, { breaks: true, gfm: true });
+      return marked(text, { breaks: true, gfm: true });
     } catch (e) {
+      console.error('Markdown parse error:', e);
       return text;
     }
   };
@@ -34,9 +48,13 @@ function hashPassword(pwd) {
 
 const hashedPassword = hashPassword(config.auth.password);
 
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', env: process.env.VERCEL ? 'vercel' : 'local' });
+});
+
 app.use((req, res, next) => {
   try {
-    if (req.path === '/login' || req.path === '/api/login') return next();
+    if (req.path === '/login' || req.path === '/api/login' || req.path === '/api/health') return next();
     if (req.path.startsWith('/css') || req.path.startsWith('/js') || req.path.startsWith('/favicon')) return next();
 
     const token = req.cookies?.[config.auth.cookieName];
@@ -49,7 +67,7 @@ app.use((req, res, next) => {
     return res.render('login', { error: null });
   } catch (e) {
     console.error('Auth middleware error:', e);
-    return res.status(500).send('服务器错误');
+    return res.status(500).send('服务器错误: ' + e.message);
   }
 });
 
@@ -58,7 +76,7 @@ app.get('/login', (req, res) => {
     res.render('login', { error: null });
   } catch (e) {
     console.error('Login page error:', e);
-    res.status(500).send('服务器错误');
+    res.status(500).send('登录页错误: ' + e.message);
   }
 });
 
@@ -76,7 +94,7 @@ app.post('/login', (req, res) => {
     res.render('login', { error: '密码错误，请重试' });
   } catch (e) {
     console.error('Login error:', e);
-    res.status(500).send('服务器错误');
+    res.status(500).send('登录错误: ' + e.message);
   }
 });
 
@@ -85,10 +103,14 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-app.use('/', require('./routes/index'));
-app.use('/schools', require('./routes/schools'));
-app.use('/stats', require('./routes/stats'));
-app.use('/compare', require('./routes/compare'));
+try {
+  app.use('/', require('./routes/index'));
+  app.use('/schools', require('./routes/schools'));
+  app.use('/stats', require('./routes/stats'));
+  app.use('/compare', require('./routes/compare'));
+} catch (e) {
+  console.error('Routes loading error:', e);
+}
 
 app.use((req, res) => {
   try {
@@ -100,7 +122,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error('Global error:', err);
-  res.status(500).send('服务器错误');
+  res.status(500).send('服务器错误: ' + err.message);
 });
 
 module.exports = app;
