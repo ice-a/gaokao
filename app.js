@@ -104,12 +104,35 @@ app.get('/logout', (req, res) => {
 });
 
 try {
+  console.log('Loading routes/index...');
   app.use('/', require('./routes/index'));
-  app.use('/schools', require('./routes/schools'));
-  app.use('/stats', require('./routes/stats'));
-  app.use('/compare', require('./routes/compare'));
+  console.log('Loaded routes/index');
 } catch (e) {
-  console.error('Routes loading error:', e);
+  console.error('routes/index error:', e.message);
+}
+
+try {
+  console.log('Loading routes/schools...');
+  app.use('/schools', require('./routes/schools'));
+  console.log('Loaded routes/schools');
+} catch (e) {
+  console.error('routes/schools error:', e.message);
+}
+
+try {
+  console.log('Loading routes/stats...');
+  app.use('/stats', require('./routes/stats'));
+  console.log('Loaded routes/stats');
+} catch (e) {
+  console.error('routes/stats error:', e.message);
+}
+
+try {
+  console.log('Loading routes/compare...');
+  app.use('/compare', require('./routes/compare'));
+  console.log('Loaded routes/compare');
+} catch (e) {
+  console.error('routes/compare error:', e.message);
 }
 
 app.use((req, res) => {
