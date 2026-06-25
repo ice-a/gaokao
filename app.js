@@ -3,7 +3,6 @@ const path = require('path');
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const { marked } = require('marked');
-const { connect } = require('./services/db');
 const config = require('./config');
 
 const app = express();
@@ -75,14 +74,11 @@ app.use((req, res) => {
   res.status(404).render('404');
 });
 
-if (process.env.VERCEL) {
-  module.exports = app;
-} else {
-  async function start() {
-    await connect();
-    app.listen(config.server.port, () => {
-      console.log(`服务已启动: http://localhost:${config.server.port}`);
-    });
-  }
-  start().catch(console.error);
+module.exports = app;
+
+if (!process.env.VERCEL) {
+  const port = config.server.port;
+  app.listen(port, () => {
+    console.log(`服务已启动: http://localhost:${port}`);
+  });
 }

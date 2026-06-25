@@ -1,23 +1,31 @@
 const { MongoClient } = require('mongodb');
 const config = require('../config');
 
+let client;
 let db;
 let schools;
 
-async function connect() {
-  const client = new MongoClient(config.mongo.uri);
-  await client.connect();
-  db = client.db(config.mongo.db);
-  schools = db.collection(config.mongo.collection);
-  console.log('MongoDB 已连接');
-  return { db, schools };
+async function getClient() {
+  if (!client) {
+    client = new MongoClient(config.mongo.uri, {
+      maxPoolSize: 1,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    await client.connect();
+    db = client.db(config.mongo.db);
+    schools = db.collection(config.mongo.collection);
+  }
+  return { client, db, schools };
 }
 
-function getSchools() {
+async function getSchools() {
+  const { schools } = await getClient();
   return schools;
 }
 
 async function queryByScore(score, province, subject, level) {
+  const { schools } = await getClient();
   const pipeline = [
     { $match: { level } },
     { $unwind: '$llm_data.admission_scores' },
@@ -56,7 +64,7 @@ async function queryByScore(score, province, subject, level) {
     const school = {
       name: r.name, province: r.province, department: r.department,
       tags: r.tags || [], satisfaction: r.satisfaction, detail_url: r.detail_url,
-      avg_min_score: avgMin, scores: r.scores.slice(-5), diff,
+      sch_id: r._id?.toString(), avg_min_score: avgMin, scores: r.scores.slice(-5), diff,
     };
     if (diff >= 30) categorized.safe.push(school);
     else if (diff >= -10) categorized.stable.push(school);
@@ -70,6 +78,7 @@ async function queryByScore(score, province, subject, level) {
 }
 
 async function listSchools({ province, tag, keyword, department, level, scoreMin, scoreMax, satisfaction, sort, page = 1, pageSize = 20 }) {
+  const { schools } = await getClient();
   const filter = {};
   if (province) filter.province = province;
   if (tag) filter.tags = tag;
@@ -104,10 +113,12 @@ async function listSchools({ province, tag, keyword, department, level, scoreMin
 }
 
 async function getSchoolDetail(schId) {
+  const { schools } = await getClient();
   return schools.findOne({ sch_id: String(schId) });
 }
 
 async function getProvinces() {
+  const { schools } = await getClient();
   return schools.aggregate([
     { $group: { _id: '$province', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
@@ -115,6 +126,7 @@ async function getProvinces() {
 }
 
 async function getTags() {
+  const { schools } = await getClient();
   return schools.aggregate([
     { $unwind: '$tags' },
     { $group: { _id: '$tags', count: { $sum: 1 } } },
@@ -123,6 +135,7 @@ async function getTags() {
 }
 
 async function getDepartments() {
+  const { schools } = await getClient();
   return schools.aggregate([
     { $group: { _id: '$department', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
@@ -130,6 +143,7 @@ async function getDepartments() {
 }
 
 async function getLevels() {
+  const { schools } = await getClient();
   return schools.aggregate([
     { $group: { _id: '$level', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
@@ -137,6 +151,7 @@ async function getLevels() {
 }
 
 async function getScoreRange() {
+  const { schools } = await getClient();
   const result = await schools.aggregate([
     { $unwind: '$llm_data.admission_scores' },
     {
@@ -151,6 +166,7 @@ async function getScoreRange() {
 }
 
 async function getStats() {
+  const { schools } = await getClient();
   const total = await schools.countDocuments({});
   const provinces = await schools.distinct('province');
   const tags = await schools.distinct('tags');
@@ -159,6 +175,7 @@ async function getStats() {
 }
 
 async function getDepartmentStats() {
+  const { schools } = await getClient();
   return schools.aggregate([
     { $group: { _id: '$department', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
@@ -167,12 +184,12 @@ async function getDepartmentStats() {
 }
 
 async function compareSchools(ids) {
-  const list = await schools.find({ sch_id: { $in: ids.map(String) } }).toArray();
-  return list;
+  const { schools } = await getClient();
+  return schools.find({ sch_id: { $in: ids.map(String) } }).toArray();
 }
 
 module.exports = {
-  connect, getSchools, queryByScore, listSchools,
+  getSchools, queryByScore, listSchools,
   getSchoolDetail, getProvinces, getTags, getStats,
   getDepartmentStats, compareSchools, getDepartments, getLevels, getScoreRange,
 };
