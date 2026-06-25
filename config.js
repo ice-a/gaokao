@@ -15,7 +15,7 @@ module.exports = {
     port: parseInt(process.env.PORT) || 3000,
   },
   auth: {
-    password: process.env.SITE_PASSWORD || 'gaokao2025',
+    password: process.env.SITE_PASSWORD || 'gaokao2026',
     cookieName: 'gaokao_auth',
     cookieMaxAge: 7 * 24 * 60 * 60 * 1000,
   },
