@@ -75,11 +75,14 @@ app.use((req, res) => {
   res.status(404).render('404');
 });
 
-async function start() {
-  await connect();
-  app.listen(config.server.port, () => {
-    console.log(`服务已启动: http://localhost:${config.server.port}`);
-  });
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  async function start() {
+    await connect();
+    app.listen(config.server.port, () => {
+      console.log(`服务已启动: http://localhost:${config.server.port}`);
+    });
+  }
+  start().catch(console.error);
 }
-
-start().catch(console.error);
