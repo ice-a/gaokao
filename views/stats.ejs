@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>数据统计 - 高考志愿填报分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <%- include('nav', { active: 'stats' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">数据统计</h1>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-3 md:p-5 text-center">
+                <div class="text-2xl md:text-3xl font-bold text-blue-600"><%= stats.total %></div>
+                <div class="text-xs md:text-sm text-gray-500 mt-1">高校总数</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-3 md:p-5 text-center">
+                <div class="text-2xl md:text-3xl font-bold text-indigo-600"><%= stats.provinces %></div>
+                <div class="text-xs md:text-sm text-gray-500 mt-1">覆盖省份</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-3 md:p-5 text-center">
+                <div class="text-2xl md:text-3xl font-bold text-green-600"><%= stats.tags %></div>
+                <div class="text-xs md:text-sm text-gray-500 mt-1">特色标签</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-3 md:p-5 text-center">
+                <div class="text-2xl md:text-3xl font-bold text-orange-600"><%= stats.withScores %></div>
+                <div class="text-xs md:text-sm text-gray-500 mt-1">有分数线</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">各省份高校数量</h2>
+                <canvas id="provinceChart"></canvas>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">主管部门分布 TOP 15</h2>
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+
+        <div class="mt-4 md:mt-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">省份高校数量明细</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 text-sm">
+                <% provinces.forEach(p => { %>
+                <a href="/schools?province=<%= p._id %>" class="flex justify-between items-center px-3 py-2 bg-gray-50 rounded-lg hover:bg-blue-50">
+                    <span class="text-gray-700"><%= p._id %></span>
+                    <span class="font-semibold text-blue-600"><%= p.count %></span>
+                </a>
+                <% }); %>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    const provinces = <%- JSON.stringify(provinces.slice(0, 20)) %>;
+    const departments = <%- JSON.stringify(departments.slice(0, 15)) %>;
+
+    new Chart(document.getElementById('provinceChart'), {
+        type: 'bar',
+        data: {
+            labels: provinces.map(p => p._id),
+            datasets: [{
+                label: '高校数量',
+                data: provinces.map(p => p.count),
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    new Chart(document.getElementById('deptChart'), {
+        type: 'doughnut',
+        data: {
+            labels: departments.map(d => d._id),
+            datasets: [{
+                data: departments.map(d => d.count),
+                backgroundColor: [
+                    '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E',
+                    '#F97316', '#EAB308', '#22C55E', '#14B8A6', '#06B6D4',
+                    '#0EA5E9', '#A855F7', '#D946EF', '#F472B6', '#FB923C',
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>高校库 - 高考志愿填报分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <%- include('nav', { active: 'schools' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">高校库 <span class="text-sm font-normal text-gray-500">共 <%= total %> 所</span></h1>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-5 mb-4 md:mb-6">
+            <form method="GET" action="/schools" id="filterForm">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">关键词</label>
+                        <input type="text" name="keyword" value="<%= query.keyword || '' %>" placeholder="学校名称"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">省份</label>
+                        <select name="province" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">全部</option>
+                            <% provinces.forEach(p => { %>
+                            <option value="<%= p._id %>" <%= query.province === p._id ? 'selected' : '' %>><%= p._id %>(<%= p.count %>)</option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">主管部门</label>
+                        <select name="department" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">全部</option>
+                            <% departments.forEach(d => { %>
+                            <option value="<%= d._id %>" <%= query.department === d._id ? 'selected' : '' %>><%= d._id %>(<%= d.count %>)</option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">层次</label>
+                        <select name="level" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">全部</option>
+                            <% levels.forEach(l => { %>
+                            <option value="<%= l._id %>" <%= query.level === l._id ? 'selected' : '' %>><%= l._id %>(<%= l.count %>)</option>
+                            <% }); %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-3 md:mb-4">
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">标签</label>
+                        <select name="tag" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">全部</option>
+                            <% tags.forEach(t => { %>
+                            <option value="<%= t._id %>" <%= query.tag === t._id ? 'selected' : '' %>><%= t._id %>(<%= t.count %>)</option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">分数范围</label>
+                        <div class="flex gap-1 items-center">
+                            <input type="number" name="scoreMin" value="<%= query.scoreMin || '' %>" placeholder="最低"
+                                class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm">
+                            <span class="text-gray-400">-</span>
+                            <input type="number" name="scoreMax" value="<%= query.scoreMax || '' %>" placeholder="最高"
+                                class="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">满意度</label>
+                        <select name="satisfaction" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="">不限</option>
+                            <option value="4.5" <%= query.satisfaction === '4.5' ? 'selected' : '' %>>4.5+</option>
+                            <option value="4.0" <%= query.satisfaction === '4.0' ? 'selected' : '' %>>4.0+</option>
+                            <option value="3.5" <%= query.satisfaction === '3.5' ? 'selected' : '' %>>3.5+</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">排序</label>
+                        <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="" <%= !query.sort ? 'selected' : '' %>>名称</option>
+                            <option value="score_desc" <%= query.sort === 'score_desc' ? 'selected' : '' %>>分数↓</option>
+                            <option value="satisfaction" <%= query.sort === 'satisfaction' ? 'selected' : '' %>>满意度↓</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3 md:mb-4">
+                    <label class="text-xs text-gray-500 mb-2 block">意向行业</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="industry" value="" class="hidden peer" <%= !query.industry ? 'checked' : '' %>>
+                            <span class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 inline-block border border-gray-300 rounded-lg px-3 py-1.5 text-xs hover:border-blue-400 transition">🎯 不限</span>
+                        </label>
+                        <% industries.forEach(ind => { %>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="industry" value="<%= ind.id %>" class="hidden peer" <%= query.industry === ind.id ? 'checked' : '' %>>
+                            <span class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 inline-block border border-gray-300 rounded-lg px-3 py-1.5 text-xs hover:border-blue-400 transition"><%= ind.icon %> <%= ind.name.split('/')[0] %></span>
+                        </label>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 md:gap-3 items-center">
+                    <button type="submit" class="bg-blue-600 text-white px-4 md:px-6 py-2 rounded-lg text-sm hover:bg-blue-700">筛选</button>
+                    <a href="/schools" class="text-gray-500 text-sm hover:text-gray-700 px-3 py-2">重置</a>
+                    <span class="text-gray-400 text-xs md:text-sm ml-auto">共 <strong class="text-blue-600"><%= total %></strong> 所</span>
+                </div>
+            </form>
+        </div>
+
+        <% if (selectedIndustry) { %>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-4 md:mb-6">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-lg"><%= selectedIndustry.icon %></span>
+                <span class="font-semibold text-indigo-800"><%= selectedIndustry.name %></span>
+                <span class="text-xs text-indigo-500">点击学校详情可查看该行业的优势专业</span>
+            </div>
+            <div class="flex flex-wrap gap-1 md:gap-2">
+                <% selectedIndustry.majors.forEach(m => { %>
+                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full"><%= m %></span>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            <% list.forEach(s => { %>
+            <a href="/schools/<%= s.sch_id %><%= query.industry ? '?industry=' + query.industry : '' %>" class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 block active:scale-[0.98]">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 class="text-base md:text-lg font-bold text-gray-800 truncate flex-1"><%= s.name %></h3>
+                    <% if (s.satisfaction) { %>
+                    <span class="text-yellow-500 text-xs md:text-sm ml-2 whitespace-nowrap">⭐ <%= s.satisfaction %></span>
+                    <% } %>
+                </div>
+                <div class="text-xs md:text-sm text-gray-500 mb-2">
+                    <span><%= s.province %></span>
+                    <span class="mx-1">|</span>
+                    <span class="truncate"><%= s.department %></span>
+                    <span class="mx-1">|</span>
+                    <span><%= s.level %></span>
+                </div>
+                <% if (s.tags && s.tags.length) { %>
+                <div class="flex flex-wrap gap-1 mb-2">
+                    <% s.tags.forEach(t => { %>
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full"><%= t %></span>
+                    <% }); %>
+                </div>
+                <% } %>
+                <% const scores = s.llm_data?.admission_scores || []; %>
+                <% if (scores.length) { %>
+                <div class="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100">
+                    最新: <span class="text-blue-600 font-semibold"><%= scores[scores.length - 1].min_score %></span>
+                    <span class="ml-1">(<%= scores[scores.length - 1].year %>)</span>
+                </div>
+                <% } %>
+            </a>
+            <% }); %>
+        </div>
+
+        <% if (totalPages > 1) { %>
+        <div class="flex justify-center gap-1 md:gap-2 mt-6 md:mt-8 flex-wrap">
+            <% const q = Object.entries(query).filter(([k,v]) => v && k !== 'page').map(([k,v]) => k+'='+encodeURIComponent(v)).join('&'); %>
+            <% if (page > 1) { %>
+            <a href="/schools?page=<%= page - 1 %>&<%= q %>" class="px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm bg-white text-gray-600 hover:bg-gray-100">上一页</a>
+            <% } %>
+            <% for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) { %>
+            <a href="/schools?page=<%= i %>&<%= q %>"
+                class="px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm <%= i === page ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' %>">
+                <%= i %>
+            </a>
+            <% } %>
+            <% if (page < totalPages) { %>
+            <a href="/schools?page=<%= page + 1 %>&<%= q %>" class="px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm bg-white text-gray-600 hover:bg-gray-100">下一页</a>
+            <% } %>
+            <span class="text-gray-400 text-xs md:text-sm self-center ml-2">共 <%= totalPages %> 页</span>
+        </div>
+        <% } %>
+    </main>
+</body>
+</html>

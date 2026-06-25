@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= province %> <%= score %>分 - 志愿分析结果</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <%- include('nav', { active: 'index' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <div class="mb-4 md:mb-6">
+            <a href="/" class="text-blue-600 hover:text-blue-800 text-sm">← 返回重新查询</a>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
+            <div class="flex flex-wrap gap-3 md:gap-6 items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 text-xs md:text-sm">分数</span>
+                    <span class="text-xl md:text-2xl font-bold text-blue-600"><%= score %></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 text-xs md:text-sm">科类</span>
+                    <span class="text-base md:text-lg font-semibold"><%= subject %></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 text-xs md:text-sm">省份</span>
+                    <span class="text-base md:text-lg font-semibold"><%= province %></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 text-xs md:text-sm">层次</span>
+                    <span class="text-base md:text-lg font-semibold"><%= level %></span>
+                </div>
+                <% if (industry) { %>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 text-xs md:text-sm">行业</span>
+                    <span class="text-base md:text-lg font-semibold text-indigo-600"><%= industry.icon %> <%= industry.name.split('/')[0] %></span>
+                </div>
+                <% } %>
+                <% if (preference) { %>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 text-xs md:text-sm">偏好</span>
+                    <span class="text-base md:text-lg font-semibold text-indigo-600"><%= preference %></span>
+                </div>
+                <% } %>
+            </div>
+            <% if (industry) { %>
+            <div class="mt-3 pt-3 border-t border-gray-100">
+                <span class="text-xs text-gray-500">关注专业：</span>
+                <div class="flex flex-wrap gap-1 md:gap-2 mt-1">
+                    <% industry.majors.forEach(m => { %>
+                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs rounded-full"><%= m %></span>
+                    <% }); %>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
+            <% const cats = [
+                { key: 'rush', label: '冲一冲', icon: '🚀', color: 'red', prob: '20%-40%' },
+                { key: 'stable', label: '稳一稳', icon: '✅', color: 'blue', prob: '50%-80%' },
+                { key: 'safe', label: '保一保', icon: '🛡️', color: 'green', prob: '80%+' }
+            ]; %>
+            <% cats.forEach(c => { %>
+            <div class="bg-<%= c.color %>-50 rounded-xl p-3 md:p-4 border border-<%= c.color %>-100">
+                <div class="text-<%= c.color %>-600 font-bold text-sm md:text-lg mb-1"><%= c.icon %> <%= c.label %></div>
+                <div class="text-<%= c.color %>-500 text-xs md:text-sm hidden sm:block">录取概率 <%= c.prob %></div>
+                <div class="text-xl md:text-2xl font-bold text-<%= c.color %>-700 mt-1 md:mt-2"><%= schools[c.key].length %></div>
+                <div class="text-<%= c.color %>-500 text-xs">所院校</div>
+            </div>
+            <% }); %>
+        </div>
+
+        <% cats.forEach(cat => { %>
+            <% if (schools[cat.key].length === 0) return; %>
+            <section class="mb-6 md:mb-8">
+                <h2 class="text-lg md:text-xl font-bold text-<%= cat.color %>-600 mb-3 md:mb-4 flex items-center gap-2">
+                    <span class="bg-<%= cat.color %>-100 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm"><%= cat.key === 'rush' ? '冲' : (cat.key === 'stable' ? '稳' : '保') %></span>
+                    <%= cat.label %>（<%= schools[cat.key].length %> 所）
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <% schools[cat.key].slice(0, 10).forEach(s => { %>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                        <div class="flex items-start justify-between mb-2 md:mb-3">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base md:text-lg font-bold text-gray-800 truncate"><%= s.name %></h3>
+                                <div class="flex items-center gap-1 md:gap-2 mt-1 text-xs md:text-sm">
+                                    <span class="text-gray-500"><%= s.province %></span>
+                                    <span class="text-gray-400">|</span>
+                                    <span class="text-gray-500 truncate"><%= s.department %></span>
+                                </div>
+                            </div>
+                            <div class="text-right ml-3">
+                                <div class="text-<%= cat.color %>-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                                <div class="text-xs text-gray-400">近年最低分</div>
+                            </div>
+                        </div>
+                        <% if (s.tags && s.tags.length) { %>
+                        <div class="flex flex-wrap gap-1 mb-2 md:mb-3">
+                            <% s.tags.forEach(t => { %>
+                            <span class="px-2 py-0.5 bg-<%= cat.color %>-50 text-<%= cat.color %>-600 text-xs rounded-full"><%= t %></span>
+                            <% }); %>
+                        </div>
+                        <% } %>
+                        <div class="flex items-center justify-between text-xs md:text-sm">
+                            <span class="text-gray-500">分差: <span class="font-semibold text-<%= cat.color %>-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                            <% if (s.satisfaction) { %>
+                            <span class="text-gray-500 hidden sm:inline">满意度: <span class="font-semibold"><%= s.satisfaction %></span></span>
+                            <% } %>
+                            <a href="/schools/<%= s.sch_id || '' %>" class="text-<%= cat.color %>-500 hover:underline">详情 →</a>
+                        </div>
+                        <% if (s.scores && s.scores.length) { %>
+                        <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-100">
+                            <div class="text-xs text-gray-400 mb-1 md:mb-2">历年录取分数线</div>
+                            <div class="flex gap-1 md:gap-2 flex-wrap">
+                                <% s.scores.slice(-4).forEach(sc => { %>
+                                <div class="bg-gray-50 rounded px-2 py-1 text-xs">
+                                    <span class="text-gray-500"><%= sc.year %></span>
+                                    <span class="font-semibold ml-1"><%= sc.min_score %></span>
+                                </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                    <% }); %>
+                </div>
+                <% if (schools[cat.key].length > 10) { %>
+                <div class="text-center mt-3 md:mt-4">
+                    <button onclick="toggleMore('<%= cat.key %>')" class="text-<%= cat.color %>-500 hover:text-<%= cat.color %>-700 text-sm">查看更多</button>
+                    <div id="extra-<%= cat.key %>" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
+                        <% schools[cat.key].slice(10).forEach(s => { %>
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h3 class="text-base md:text-lg font-bold text-gray-800"><%= s.name %></h3>
+                                    <div class="flex items-center gap-2 mt-1 text-xs md:text-sm">
+                                        <span class="text-gray-500"><%= s.province %></span>
+                                        <span class="text-gray-400">|</span>
+                                        <span class="text-gray-500"><%= s.department %></span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-<%= cat.color %>-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                                    <div class="text-xs text-gray-400">近年最低分</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-xs md:text-sm">
+                                <span class="text-gray-500">分差: <span class="font-semibold text-<%= cat.color %>-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                                <a href="/schools/<%= s.sch_id || '' %>" class="text-<%= cat.color %>-500 hover:underline">详情 →</a>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+                <% } %>
+            </section>
+        <% }); %>
+
+        <div class="mt-8 md:mt-10 bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-4 md:px-6 py-3 md:py-4">
+                <h2 class="text-base md:text-lg font-bold text-white flex items-center gap-2">🤖 AI 综合分析报告</h2>
+            </div>
+            <div class="p-4 md:p-8 markdown-body">
+                <%- md(aiAnalysis) %>
+            </div>
+        </div>
+
+        <div class="mt-6 md:mt-8 text-center">
+            <a href="/" class="inline-block bg-blue-600 text-white px-6 md:px-8 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition text-sm md:text-base">重新查询</a>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 md:py-6 text-gray-400 text-xs md:text-sm">
+        数据来源：阳光高考网 · AI 分析仅供参考
+    </footer>
+
+    <script>
+    function toggleMore(cat) {
+        const el = document.getElementById('extra-' + cat);
+        el.classList.toggle('hidden');
+        const btn = el.previousElementSibling.querySelector('button');
+        btn.textContent = el.classList.contains('hidden') ? '查看更多' : '收起';
+    }
+    </script>
+</body>
+</html>

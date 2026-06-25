@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= school.name %> - 高校详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <%- include('nav', { active: 'schools' }) %>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 md:py-8">
+        <a href="/schools" class="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-block">← 返回高校库</a>
+
+        <div class="bg-white rounded-2xl shadow-lg p-5 md:p-8 mb-5 md:mb-6">
+            <div class="flex items-start gap-4 md:gap-6">
+                <img src="<%= school.logo_url %>" onerror="this.src='https://t1.chei.com.cn/common/xh/default.jpg'" alt="" class="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover bg-gray-100 flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2"><%= school.name %></h1>
+                    <div class="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-gray-600 mb-3">
+                        <span>📍 <%= school.province %></span>
+                        <span>🏛️ <%= school.department %></span>
+                        <span>📚 <%= school.level %></span>
+                        <span class="hidden sm:inline">🆔 <%= school.yxdm %></span>
+                        <% if (school.satisfaction) { %>
+                        <span>⭐ <%= school.satisfaction %></span>
+                        <% } %>
+                    </div>
+                    <% if (school.tags && school.tags.length) { %>
+                    <div class="flex flex-wrap gap-1 md:gap-2">
+                        <% school.tags.forEach(t => { %>
+                        <span class="px-2 md:px-3 py-1 bg-blue-50 text-blue-600 text-xs md:text-sm rounded-full"><%= t %></span>
+                        <% }); %>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📊 历年录取分数线</h2>
+                <% const scores = school.llm_data?.admission_scores || []; %>
+                <% if (scores.length) { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2 text-gray-500 text-xs">年份</th>
+                                <th class="text-left py-2 text-gray-500 text-xs">批次</th>
+                                <th class="text-right py-2 text-gray-500 text-xs">最低分</th>
+                                <th class="text-right py-2 text-gray-500 text-xs">录取</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% scores.forEach(s => { %>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2"><%= s.year %></td>
+                                <td class="py-2 text-xs"><%= s.batch %></td>
+                                <td class="py-2 text-right font-semibold text-blue-600"><%= s.min_score || '-' %></td>
+                                <td class="py-2 text-right"><%= s.enrolled || '-' %></td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                <p class="text-gray-400 text-sm">暂无数据</p>
+                <% } %>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">📈 招生计划</h2>
+                <% const enrollment = school.llm_data?.enrollment || []; %>
+                <% if (enrollment.length) { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2 text-gray-500 text-xs">年份</th>
+                                <th class="text-right py-2 text-gray-500 text-xs">总计划</th>
+                                <th class="text-right py-2 text-gray-500 text-xs">本科</th>
+                                <th class="text-right py-2 text-gray-500 text-xs">专科</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% enrollment.forEach(e => { %>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2"><%= e.year %></td>
+                                <td class="py-2 text-right font-semibold"><%= e.total_planned || '-' %></td>
+                                <td class="py-2 text-right"><%= e.undergraduate || '-' %></td>
+                                <td class="py-2 text-right"><%= e.college || '-' %></td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                <p class="text-gray-400 text-sm">暂无数据</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="mt-5 md:mt-6 bg-white rounded-xl shadow-sm p-4 md:p-6">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">🏭 行业热门专业查询</h2>
+            <p class="text-sm text-gray-500 mb-4">选择一个行业，AI 帮你分析该校在该行业的优势专业和就业前景</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 mb-4">
+                <% industries.forEach(ind => { %>
+                <button onclick="fetchIndustryMajors('<%= ind.id %>', '<%= ind.name %>')" 
+                    class="industry-btn border border-gray-300 rounded-lg px-3 py-2 text-center text-sm hover:border-blue-400 hover:bg-blue-50 transition">
+                    <div class="text-lg mb-0.5"><%= ind.icon %></div>
+                    <div class="text-xs"><%= ind.name.split('/')[0] %></div>
+                </button>
+                <% }); %>
+            </div>
+            <div id="industryResult" class="hidden">
+                <div id="industryContent" class="markdown-body text-sm"></div>
+            </div>
+        </div>
+
+        <div class="mt-4 md:mt-6 flex flex-wrap gap-2 md:gap-3">
+            <a href="<%= school.detail_url %>" target="_blank" class="bg-blue-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm hover:bg-blue-700">阳光高考</a>
+            <button onclick="addToCompare('<%= school.sch_id %>')" class="bg-indigo-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm hover:bg-indigo-700">+ 加入对比</button>
+            <button onclick="fetchLatestInfo()" id="fetchBtn" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-3 md:px-5 py-2 rounded-lg text-xs md:text-sm hover:from-green-700 hover:to-emerald-700">
+                🌐 获取最新招生信息
+            </button>
+        </div>
+
+        <% if (school.latest_info?.content) { %>
+        <div class="mt-6 md:mt-8 bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-4 md:px-6 py-3 md:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h2 class="text-base md:text-lg font-bold text-white">🌐 最新招生信息</h2>
+                <div class="flex items-center gap-2 md:gap-3">
+                    <span class="text-green-100 text-xs"><%= new Date(school.latest_info.fetched_at).toLocaleString('zh-CN') %></span>
+                    <button onclick="fetchLatestInfo()" class="text-xs bg-white/20 text-white px-2 md:px-3 py-1 rounded-full hover:bg-white/30">刷新</button>
+                </div>
+            </div>
+            <div class="p-4 md:p-8 markdown-body">
+                <%- md(school.latest_info.content) %>
+            </div>
+        </div>
+        <% } %>
+
+        <div id="latestInfoSection" class="mt-6 md:mt-8 hidden">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
+                    <h2 class="text-base md:text-lg font-bold text-white">🌐 AI 最新招生信息</h2>
+                    <span id="fetchTime" class="text-green-100 text-xs"></span>
+                </div>
+                <div id="latestInfoContent" class="p-4 md:p-8 markdown-body"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    function addToCompare(id) {
+        let ids = JSON.parse(localStorage.getItem('compareIds') || '[]');
+        if (ids.includes(id)) return alert('已在对比列表中');
+        if (ids.length >= 4) return alert('最多对比4所学校');
+        ids.push(id);
+        localStorage.setItem('compareIds', JSON.stringify(ids));
+        alert('已加入对比，当前 ' + ids.length + ' 所');
+    }
+
+    async function fetchIndustryMajors(industryId, industryName) {
+        const resultDiv = document.getElementById('industryResult');
+        const contentDiv = document.getElementById('industryContent');
+        
+        const btns = document.querySelectorAll('.industry-btn');
+        btns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
+        event.target.closest('.industry-btn').classList.add('border-blue-500', 'bg-blue-50');
+
+        resultDiv.classList.remove('hidden');
+        contentDiv.innerHTML = '<p class="text-gray-500">AI 正在分析 <%= school.name %> 的 ' + industryName + ' 相关专业...</p>';
+
+        try {
+            const res = await fetch('/schools/<%= school.sch_id %>/industry-majors', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ industryId }),
+            });
+            const data = await res.json();
+
+            if (data.success && data.data) {
+                let html = '<h3 class="font-bold text-gray-800 mb-3"><%= school.name %> - ' + industryName + ' 相关专业</h3>';
+                html += '<div class="space-y-3">';
+                data.data.forEach(m => {
+                    const strongBadge = m.is_strong ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full ml-2">优势学科</span>' : '';
+                    html += '<div class="border border-gray-200 rounded-lg p-3">';
+                    html += '<div class="flex items-center justify-between mb-1">';
+                    html += '<span class="font-semibold text-gray-800">' + m.name + strongBadge + '</span>';
+                    html += '<span class="text-blue-600 font-semibold text-sm">' + (m.score_range || '待确认') + '</span>';
+                    html += '</div>';
+                    html += '<p class="text-xs text-gray-500">就业前景: ' + (m.employment || '待确认') + '</p>';
+                    html += '</div>';
+                });
+                html += '</div>';
+                contentDiv.innerHTML = html;
+            } else {
+                contentDiv.innerHTML = '<p class="text-red-500">获取失败: ' + (data.error || '未知错误') + '</p>';
+            }
+        } catch (e) {
+            contentDiv.innerHTML = '<p class="text-red-500">网络错误</p>';
+        }
+    }
+
+    async function fetchLatestInfo() {
+        const btn = document.getElementById('fetchBtn');
+        const section = document.getElementById('latestInfoSection');
+        const content = document.getElementById('latestInfoContent');
+        const fetchTime = document.getElementById('fetchTime');
+
+        btn.disabled = true;
+        btn.innerHTML = '⏳ AI 正在搜索，请稍候...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+        try {
+            const res = await fetch('/schools/<%= school.sch_id %>/fetch-info', { method: 'POST' });
+            const data = await res.json();
+
+            section.classList.remove('hidden');
+            if (data.success) {
+                content.innerHTML = data.html;
+                fetchTime.textContent = new Date().toLocaleString('zh-CN');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                content.innerHTML = '<p class="text-red-500">获取失败: ' + (data.error || '未知错误') + '</p>';
+            }
+        } catch (e) {
+            section.classList.remove('hidden');
+            content.innerHTML = '<p class="text-red-500">网络错误</p>';
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '🌐 获取最新招生信息';
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+    }
+    </script>
+</body>
+</html>

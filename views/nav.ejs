@@ -1,0 +1,49 @@
+<nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-3 md:px-4 py-3 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xl md:text-2xl">🎓</span>
+            <span class="text-sm md:text-xl font-bold text-gray-800 whitespace-nowrap">高考志愿分析</span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-4 text-sm">
+            <a href="/" class="<%= typeof active !== 'undefined' && active === 'index' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">志愿分析</a>
+            <a href="/schools" class="<%= typeof active !== 'undefined' && active === 'schools' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">高校库</a>
+            <a href="/stats" class="<%= typeof active !== 'undefined' && active === 'stats' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">数据统计</a>
+            <a href="/compare" class="<%= typeof active !== 'undefined' && active === 'compare' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">高校对比</a>
+            <span class="text-gray-300">|</span>
+            <a href="/logout" class="text-gray-400 hover:text-red-500">退出</a>
+        </div>
+
+        <button onclick="toggleMenu()" class="md:hidden p-2 text-gray-600 hover:text-blue-600 flex-shrink-0">
+            <svg id="menuIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg id="closeIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <div id="mobileMenu" class="hidden md:hidden border-t border-gray-100 bg-white">
+        <div class="px-3 py-2 space-y-1">
+            <a href="/" class="block py-2.5 px-3 rounded-lg text-sm <%= typeof active !== 'undefined' && active === 'index' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' %>">📊 志愿分析</a>
+            <a href="/schools" class="block py-2.5 px-3 rounded-lg text-sm <%= typeof active !== 'undefined' && active === 'schools' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' %>">🏫 高校库</a>
+            <a href="/stats" class="block py-2.5 px-3 rounded-lg text-sm <%= typeof active !== 'undefined' && active === 'stats' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' %>">📈 数据统计</a>
+            <a href="/compare" class="block py-2.5 px-3 rounded-lg text-sm <%= typeof active !== 'undefined' && active === 'compare' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' %>">⚖️ 高校对比</a>
+            <div class="border-t border-gray-100 pt-1 mt-1">
+                <a href="/logout" class="block py-2.5 px-3 rounded-lg text-sm text-red-500">🚪 退出</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+    menu.classList.toggle('hidden');
+    menuIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+}
+</script>

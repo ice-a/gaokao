@@ -1,0 +1,19 @@
+{
+  "name": "gaokao-advisor",
+  "version": "1.0.0",
+  "description": "高考志愿填报分析系统",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "marked": "^18.0.5",
+    "mongodb": "^6.9.0",
+    "openai": "^4.70.0"
+  }
+}

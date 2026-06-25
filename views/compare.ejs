@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>高校对比 - 高考志愿填报分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <%- include('nav', { active: 'compare' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">高校对比</h1>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 md:mb-6">
+            <h2 class="text-base md:text-lg font-semibold mb-3 md:mb-4">选择对比学校</h2>
+            <form method="POST" action="/compare" id="compareForm">
+                <div class="flex gap-2 md:gap-3 mb-3 md:mb-4">
+                    <input type="text" id="searchInput" placeholder="输入学校名称搜索..." class="flex-1 px-3 md:px-4 py-2 border border-gray-300 rounded-lg text-sm md:text-base">
+                    <button type="button" onclick="searchSchool()" class="bg-blue-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-blue-700 text-sm md:text-base">搜索</button>
+                </div>
+                <div id="searchResults" class="hidden mb-3 md:mb-4 max-h-48 overflow-y-auto border border-gray-200 rounded-lg bg-white"></div>
+                <div id="selectedSchools" class="flex flex-wrap gap-2 mb-3 md:mb-4"></div>
+                <input type="hidden" name="ids" id="idsInput" value="<%= ids.join(',') %>">
+                <button type="submit" class="bg-indigo-600 text-white px-4 md:px-6 py-2 rounded-lg hover:bg-indigo-700 text-sm md:text-base">开始对比</button>
+            </form>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm"><%= error %></div>
+        <% } %>
+
+        <% if (schools.length >= 2) { %>
+        <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 md:mb-6 overflow-x-auto">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">对比表格</h2>
+            <table class="w-full text-xs md:text-sm min-w-[500px]">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-2 md:py-3 text-gray-500 w-20 md:w-32">维度</th>
+                        <% schools.forEach(s => { %>
+                        <th class="text-center py-2 md:py-3 font-bold text-gray-800"><%= s.name %></th>
+                        <% }); %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 md:py-3 text-gray-500">省份</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center"><%= s.province %></td>
+                        <% }); %>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 md:py-3 text-gray-500">主管部门</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center"><%= s.department %></td>
+                        <% }); %>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 md:py-3 text-gray-500">层次</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center"><%= s.level %></td>
+                        <% }); %>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 md:py-3 text-gray-500">特色</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center">
+                            <% (s.tags || []).forEach(t => { %>
+                            <span class="inline-block px-1 md:px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full m-0.5"><%= t %></span>
+                            <% }); %>
+                        </td>
+                        <% }); %>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 md:py-3 text-gray-500">满意度</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center font-semibold"><%= s.satisfaction || '-' %></td>
+                        <% }); %>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 md:py-3 text-gray-500">最低分</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center">
+                            <% const scores = s.llm_data?.admission_scores || []; %>
+                            <% if (scores.length) { %>
+                            <span class="font-semibold text-blue-600"><%= scores[scores.length - 1].min_score %></span>
+                            <span class="text-gray-400 text-xs">(<%= scores[scores.length - 1].year %>)</span>
+                            <% } else { %>
+                            <span class="text-gray-400">-</span>
+                            <% } %>
+                        </td>
+                        <% }); %>
+                    </tr>
+                    <tr>
+                        <td class="py-2 md:py-3 text-gray-500">详情</td>
+                        <% schools.forEach(s => { %>
+                        <td class="py-2 md:py-3 text-center">
+                            <a href="/schools/<%= s.sch_id %>" class="text-blue-500 hover:underline">查看</a>
+                        </td>
+                        <% }); %>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-center mb-4 md:mb-6">
+            <button onclick="getAIAnalysis()" id="aiBtn" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg hover:from-indigo-700 hover:to-blue-700 text-sm md:text-base">
+                🤖 AI 对比分析
+            </button>
+        </div>
+
+        <div id="aiResult" class="hidden bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-4 md:px-6 py-3 md:py-4">
+                <h2 class="text-base md:text-lg font-bold text-white">🤖 AI 对比分析报告</h2>
+            </div>
+            <div id="aiContent" class="p-4 md:p-8 markdown-body"></div>
+        </div>
+        <% } %>
+    </main>
+
+    <script>
+    let selectedIds = '<%= ids.join(',') %>'.split(',').filter(Boolean);
+
+    function renderSelected() {
+        const container = document.getElementById('selectedSchools');
+        container.innerHTML = selectedIds.map(id =>
+            '<span class="bg-blue-100 text-blue-700 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm flex items-center gap-1">' +
+            id + ' <button onclick="removeId(\'' + id + '\')" class="text-blue-500 hover:text-blue-700">×</button></span>'
+        ).join('');
+        document.getElementById('idsInput').value = selectedIds.join(',');
+    }
+
+    function removeId(id) {
+        selectedIds = selectedIds.filter(i => i !== id);
+        renderSelected();
+    }
+
+    async function searchSchool() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        if (!keyword) return;
+        const res = await fetch('/compare/search?keyword=' + encodeURIComponent(keyword));
+        const data = await res.json();
+        const container = document.getElementById('searchResults');
+        container.classList.remove('hidden');
+        container.innerHTML = data.map(s =>
+            '<div class="px-3 md:px-4 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center text-sm" onclick="addSchool(\'' + s.sch_id + '\',\'' + s.name + '\')">' +
+            '<span>' + s.name + ' <span class="text-gray-400 text-xs">' + s.province + '</span></span>' +
+            '<span class="text-blue-500 text-xs">+ 添加</span></div>'
+        ).join('');
+    }
+
+    function addSchool(id, name) {
+        if (selectedIds.includes(id)) return alert('已在列表中');
+        if (selectedIds.length >= 4) return alert('最多对比4所');
+        selectedIds.push(id);
+        renderSelected();
+        document.getElementById('searchResults').classList.add('hidden');
+    }
+
+    async function getAIAnalysis() {
+        const btn = document.getElementById('aiBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ AI 分析中...';
+        btn.classList.add('opacity-70');
+        const res = await fetch('/compare/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: selectedIds }),
+        });
+        const data = await res.json();
+        const container = document.getElementById('aiResult');
+        const content = document.getElementById('aiContent');
+        container.classList.remove('hidden');
+        content.innerHTML = (data.analysis || data.error || '分析失败').replace(/\n/g, '<br>');
+        btn.disabled = false;
+        btn.textContent = '🤖 AI 对比分析';
+        btn.classList.remove('opacity-70');
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') searchSchool();
+    });
+
+    renderSelected();
+    </script>
+</body>
+</html>
