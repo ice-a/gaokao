@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
     });
   } catch (e) {
     console.error('高校库错误:', e);
-    res.status(500).render('404');
+    res.status(503).render('error', { message: '数据库加载失败: ' + e.message, path: '/schools' });
   }
 });
 
@@ -38,7 +38,7 @@ router.get('/:schId', async (req, res) => {
     res.render('detail', { school, industries });
   } catch (e) {
     console.error('详情页错误:', e);
-    res.status(500).render('404');
+    res.status(503).render('error', { message: '加载失败: ' + e.message, path: '/schools' });
   }
 });
 
@@ -70,7 +70,7 @@ router.post('/:schId/fetch-info', async (req, res) => {
 
     const analysis = await callLLM(prompt);
     const html = marked.parse(analysis, { breaks: true, gfm: true });
-    
+
     const schools = await getSchools();
     await schools.updateOne(
       { sch_id: String(req.params.schId) },

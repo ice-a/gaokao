@@ -1,4 +1,4 @@
-<nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+<nav class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-3 md:px-4 py-3 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2 flex-shrink-0">
             <span class="text-xl md:text-2xl">🎓</span>
@@ -6,12 +6,12 @@
         </a>
 
         <div class="hidden md:flex items-center gap-4 text-sm">
-            <a href="/" class="<%= typeof active !== 'undefined' && active === 'index' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">志愿分析</a>
-            <a href="/schools" class="<%= typeof active !== 'undefined' && active === 'schools' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">高校库</a>
-            <a href="/stats" class="<%= typeof active !== 'undefined' && active === 'stats' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">数据统计</a>
-            <a href="/compare" class="<%= typeof active !== 'undefined' && active === 'compare' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %>">高校对比</a>
+            <a href="/" class="<%= typeof active !== 'undefined' && active === 'index' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %> transition">志愿分析</a>
+            <a href="/schools" class="<%= typeof active !== 'undefined' && active === 'schools' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %> transition">高校库</a>
+            <a href="/stats" class="<%= typeof active !== 'undefined' && active === 'stats' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %> transition">数据统计</a>
+            <a href="/compare" class="<%= typeof active !== 'undefined' && active === 'compare' ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600' %> transition">高校对比</a>
             <span class="text-gray-300">|</span>
-            <a href="/logout" class="text-gray-400 hover:text-red-500">退出</a>
+            <a href="/logout" class="text-gray-400 hover:text-red-500 transition">退出</a>
         </div>
 
         <button onclick="toggleMenu()" class="md:hidden p-2 text-gray-600 hover:text-blue-600 flex-shrink-0">
@@ -24,7 +24,7 @@
         </button>
     </div>
 
-    <div id="mobileMenu" class="hidden md:hidden border-t border-gray-100 bg-white">
+    <div id="mobileMenu" class="hidden md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md">
         <div class="px-3 py-2 space-y-1">
             <a href="/" class="block py-2.5 px-3 rounded-lg text-sm <%= typeof active !== 'undefined' && active === 'index' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' %>">📊 志愿分析</a>
             <a href="/schools" class="block py-2.5 px-3 rounded-lg text-sm <%= typeof active !== 'undefined' && active === 'schools' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600' %>">🏫 高校库</a>
@@ -47,4 +47,3 @@ function toggleMenu() {
     closeIcon.classList.toggle('hidden');
 }
 </script>
-<script defer src="https://count.020417.xyz/script.js" data-website-id="f7a1b774-485a-47c7-9d2b-30f4f794b915"></script>

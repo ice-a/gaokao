@@ -12,7 +12,7 @@
 
     <main class="max-w-7xl mx-auto px-4 py-6 md:py-8">
         <div class="mb-4 md:mb-6">
-            <a href="/" class="text-blue-600 hover:text-blue-800 text-sm">← 返回重新查询</a>
+            <a href="/" class="text-blue-600 hover:text-blue-800 text-sm transition">← 返回重新查询</a>
         </div>
 
         <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
@@ -58,108 +58,293 @@
             <% } %>
         </div>
 
+        <!-- 统计卡片 -->
         <div class="grid grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
-            <% const cats = [
-                { key: 'rush', label: '冲一冲', icon: '🚀', color: 'red', prob: '20%-40%' },
-                { key: 'stable', label: '稳一稳', icon: '✅', color: 'blue', prob: '50%-80%' },
-                { key: 'safe', label: '保一保', icon: '🛡️', color: 'green', prob: '80%+' }
-            ]; %>
-            <% cats.forEach(c => { %>
-            <div class="bg-<%= c.color %>-50 rounded-xl p-3 md:p-4 border border-<%= c.color %>-100">
-                <div class="text-<%= c.color %>-600 font-bold text-sm md:text-lg mb-1"><%= c.icon %> <%= c.label %></div>
-                <div class="text-<%= c.color %>-500 text-xs md:text-sm hidden sm:block">录取概率 <%= c.prob %></div>
-                <div class="text-xl md:text-2xl font-bold text-<%= c.color %>-700 mt-1 md:mt-2"><%= schools[c.key].length %></div>
-                <div class="text-<%= c.color %>-500 text-xs">所院校</div>
+            <% if (schools.rush.length > 0) { %>
+            <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-3 md:p-4 border border-red-100">
+                <div class="text-red-600 font-bold text-sm md:text-lg mb-1">🚀 冲一冲</div>
+                <div class="text-red-500 text-xs md:text-sm hidden sm:block">录取概率 20%-40%</div>
+                <div class="text-xl md:text-2xl font-bold text-red-700 mt-1 md:mt-2"><%= schools.rush.length %></div>
+                <div class="text-red-500 text-xs">所院校</div>
             </div>
-            <% }); %>
+            <% } %>
+            <% if (schools.stable.length > 0) { %>
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3 md:p-4 border border-blue-100">
+                <div class="text-blue-600 font-bold text-sm md:text-lg mb-1">✅ 稳一稳</div>
+                <div class="text-blue-500 text-xs md:text-sm hidden sm:block">录取概率 50%-80%</div>
+                <div class="text-xl md:text-2xl font-bold text-blue-700 mt-1 md:mt-2"><%= schools.stable.length %></div>
+                <div class="text-blue-500 text-xs">所院校</div>
+            </div>
+            <% } %>
+            <% if (schools.safe.length > 0) { %>
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 md:p-4 border border-green-100">
+                <div class="text-green-600 font-bold text-sm md:text-lg mb-1">🛡️ 保一保</div>
+                <div class="text-green-500 text-xs md:text-sm hidden sm:block">录取概率 80%+</div>
+                <div class="text-xl md:text-2xl font-bold text-green-700 mt-1 md:mt-2"><%= schools.safe.length %></div>
+                <div class="text-green-500 text-xs">所院校</div>
+            </div>
+            <% } %>
         </div>
 
-        <% cats.forEach(cat => { %>
-            <% if (schools[cat.key].length === 0) return; %>
-            <section class="mb-6 md:mb-8">
-                <h2 class="text-lg md:text-xl font-bold text-<%= cat.color %>-600 mb-3 md:mb-4 flex items-center gap-2">
-                    <span class="bg-<%= cat.color %>-100 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm"><%= cat.key === 'rush' ? '冲' : (cat.key === 'stable' ? '稳' : '保') %></span>
-                    <%= cat.label %>（<%= schools[cat.key].length %> 所）
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    <% schools[cat.key].slice(0, 10).forEach(s => { %>
+        <!-- 冲一冲学校列表 -->
+        <% if (schools.rush.length > 0) { %>
+        <section class="mb-6 md:mb-8">
+            <h2 class="text-lg md:text-xl font-bold text-red-600 mb-3 md:mb-4 flex items-center gap-2">
+                <span class="bg-red-100 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm">冲</span>
+                冲一冲（<%= schools.rush.length %> 所）
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <% schools.rush.slice(0, 10).forEach(s => { %>
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                    <div class="flex items-start justify-between mb-2 md:mb-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base md:text-lg font-bold text-gray-800 truncate"><%= s.name %></h3>
+                            <div class="flex items-center gap-1 md:gap-2 mt-1 text-xs md:text-sm">
+                                <span class="text-gray-500"><%= s.province %></span>
+                                <span class="text-gray-400">|</span>
+                                <span class="text-gray-500 truncate"><%= s.department %></span>
+                            </div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="text-red-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                            <div class="text-xs text-gray-400">近年最低分</div>
+                        </div>
+                    </div>
+                    <% if (s.tags && s.tags.length) { %>
+                    <div class="flex flex-wrap gap-1 mb-2 md:mb-3">
+                        <% s.tags.forEach(t => { %>
+                        <span class="px-2 py-0.5 bg-red-50 text-red-600 text-xs rounded-full"><%= t %></span>
+                        <% }); %>
+                    </div>
+                    <% } %>
+                    <div class="flex items-center justify-between text-xs md:text-sm">
+                        <span class="text-gray-500">分差: <span class="font-semibold text-red-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                        <% if (s.satisfaction) { %>
+                        <span class="text-gray-500 hidden sm:inline">满意度: <span class="font-semibold"><%= s.satisfaction %></span></span>
+                        <% } %>
+                        <a href="/schools/<%= s.sch_id || '' %>" class="text-red-500 hover:underline">详情 →</a>
+                    </div>
+                    <% if (s.scores && s.scores.length) { %>
+                    <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-100">
+                        <div class="text-xs text-gray-400 mb-1 md:mb-2">历年录取分数线</div>
+                        <div class="flex gap-1 md:gap-2 flex-wrap">
+                            <% s.scores.slice(-4).forEach(sc => { %>
+                            <div class="bg-gray-50 rounded px-2 py-1 text-xs">
+                                <span class="text-gray-500"><%= sc.year %></span>
+                                <span class="font-semibold ml-1"><%= sc.min_score %></span>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <% }); %>
+            </div>
+            <% if (schools.rush.length > 10) { %>
+            <div class="text-center mt-3 md:mt-4">
+                <button onclick="toggleMore('rush')" class="text-red-500 hover:text-red-700 text-sm">查看更多</button>
+                <div id="extra-rush" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
+                    <% schools.rush.slice(10).forEach(s => { %>
                     <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
-                        <div class="flex items-start justify-between mb-2 md:mb-3">
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-base md:text-lg font-bold text-gray-800 truncate"><%= s.name %></h3>
-                                <div class="flex items-center gap-1 md:gap-2 mt-1 text-xs md:text-sm">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <h3 class="text-base md:text-lg font-bold text-gray-800"><%= s.name %></h3>
+                                <div class="flex items-center gap-2 mt-1 text-xs md:text-sm">
                                     <span class="text-gray-500"><%= s.province %></span>
                                     <span class="text-gray-400">|</span>
-                                    <span class="text-gray-500 truncate"><%= s.department %></span>
+                                    <span class="text-gray-500"><%= s.department %></span>
                                 </div>
                             </div>
-                            <div class="text-right ml-3">
-                                <div class="text-<%= cat.color %>-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                            <div class="text-right">
+                                <div class="text-red-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
                                 <div class="text-xs text-gray-400">近年最低分</div>
                             </div>
                         </div>
-                        <% if (s.tags && s.tags.length) { %>
-                        <div class="flex flex-wrap gap-1 mb-2 md:mb-3">
-                            <% s.tags.forEach(t => { %>
-                            <span class="px-2 py-0.5 bg-<%= cat.color %>-50 text-<%= cat.color %>-600 text-xs rounded-full"><%= t %></span>
-                            <% }); %>
-                        </div>
-                        <% } %>
                         <div class="flex items-center justify-between text-xs md:text-sm">
-                            <span class="text-gray-500">分差: <span class="font-semibold text-<%= cat.color %>-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
-                            <% if (s.satisfaction) { %>
-                            <span class="text-gray-500 hidden sm:inline">满意度: <span class="font-semibold"><%= s.satisfaction %></span></span>
-                            <% } %>
-                            <a href="/schools/<%= s.sch_id || '' %>" class="text-<%= cat.color %>-500 hover:underline">详情 →</a>
+                            <span class="text-gray-500">分差: <span class="font-semibold text-red-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                            <a href="/schools/<%= s.sch_id || '' %>" class="text-red-500 hover:underline">详情 →</a>
                         </div>
-                        <% if (s.scores && s.scores.length) { %>
-                        <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-100">
-                            <div class="text-xs text-gray-400 mb-1 md:mb-2">历年录取分数线</div>
-                            <div class="flex gap-1 md:gap-2 flex-wrap">
-                                <% s.scores.slice(-4).forEach(sc => { %>
-                                <div class="bg-gray-50 rounded px-2 py-1 text-xs">
-                                    <span class="text-gray-500"><%= sc.year %></span>
-                                    <span class="font-semibold ml-1"><%= sc.min_score %></span>
-                                </div>
-                                <% }); %>
-                            </div>
-                        </div>
-                        <% } %>
                     </div>
                     <% }); %>
                 </div>
-                <% if (schools[cat.key].length > 10) { %>
-                <div class="text-center mt-3 md:mt-4">
-                    <button onclick="toggleMore('<%= cat.key %>')" class="text-<%= cat.color %>-500 hover:text-<%= cat.color %>-700 text-sm">查看更多</button>
-                    <div id="extra-<%= cat.key %>" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
-                        <% schools[cat.key].slice(10).forEach(s => { %>
-                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 class="text-base md:text-lg font-bold text-gray-800"><%= s.name %></h3>
-                                    <div class="flex items-center gap-2 mt-1 text-xs md:text-sm">
-                                        <span class="text-gray-500"><%= s.province %></span>
-                                        <span class="text-gray-400">|</span>
-                                        <span class="text-gray-500"><%= s.department %></span>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-<%= cat.color %>-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
-                                    <div class="text-xs text-gray-400">近年最低分</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between text-xs md:text-sm">
-                                <span class="text-gray-500">分差: <span class="font-semibold text-<%= cat.color %>-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
-                                <a href="/schools/<%= s.sch_id || '' %>" class="text-<%= cat.color %>-500 hover:underline">详情 →</a>
+            </div>
+            <% } %>
+        </section>
+        <% } %>
+
+        <!-- 稳一稳学校列表 -->
+        <% if (schools.stable.length > 0) { %>
+        <section class="mb-6 md:mb-8">
+            <h2 class="text-lg md:text-xl font-bold text-blue-600 mb-3 md:mb-4 flex items-center gap-2">
+                <span class="bg-blue-100 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm">稳</span>
+                稳一稳（<%= schools.stable.length %> 所）
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <% schools.stable.slice(0, 10).forEach(s => { %>
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                    <div class="flex items-start justify-between mb-2 md:mb-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base md:text-lg font-bold text-gray-800 truncate"><%= s.name %></h3>
+                            <div class="flex items-center gap-1 md:gap-2 mt-1 text-xs md:text-sm">
+                                <span class="text-gray-500"><%= s.province %></span>
+                                <span class="text-gray-400">|</span>
+                                <span class="text-gray-500 truncate"><%= s.department %></span>
                             </div>
                         </div>
+                        <div class="text-right ml-3">
+                            <div class="text-blue-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                            <div class="text-xs text-gray-400">近年最低分</div>
+                        </div>
+                    </div>
+                    <% if (s.tags && s.tags.length) { %>
+                    <div class="flex flex-wrap gap-1 mb-2 md:mb-3">
+                        <% s.tags.forEach(t => { %>
+                        <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full"><%= t %></span>
                         <% }); %>
                     </div>
+                    <% } %>
+                    <div class="flex items-center justify-between text-xs md:text-sm">
+                        <span class="text-gray-500">分差: <span class="font-semibold text-blue-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                        <% if (s.satisfaction) { %>
+                        <span class="text-gray-500 hidden sm:inline">满意度: <span class="font-semibold"><%= s.satisfaction %></span></span>
+                        <% } %>
+                        <a href="/schools/<%= s.sch_id || '' %>" class="text-blue-500 hover:underline">详情 →</a>
+                    </div>
+                    <% if (s.scores && s.scores.length) { %>
+                    <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-100">
+                        <div class="text-xs text-gray-400 mb-1 md:mb-2">历年录取分数线</div>
+                        <div class="flex gap-1 md:gap-2 flex-wrap">
+                            <% s.scores.slice(-4).forEach(sc => { %>
+                            <div class="bg-gray-50 rounded px-2 py-1 text-xs">
+                                <span class="text-gray-500"><%= sc.year %></span>
+                                <span class="font-semibold ml-1"><%= sc.min_score %></span>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <% } %>
                 </div>
-                <% } %>
-            </section>
-        <% }); %>
+                <% }); %>
+            </div>
+            <% if (schools.stable.length > 10) { %>
+            <div class="text-center mt-3 md:mt-4">
+                <button onclick="toggleMore('stable')" class="text-blue-500 hover:text-blue-700 text-sm">查看更多</button>
+                <div id="extra-stable" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
+                    <% schools.stable.slice(10).forEach(s => { %>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <h3 class="text-base md:text-lg font-bold text-gray-800"><%= s.name %></h3>
+                                <div class="flex items-center gap-2 mt-1 text-xs md:text-sm">
+                                    <span class="text-gray-500"><%= s.province %></span>
+                                    <span class="text-gray-400">|</span>
+                                    <span class="text-gray-500"><%= s.department %></span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-blue-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                                <div class="text-xs text-gray-400">近年最低分</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs md:text-sm">
+                            <span class="text-gray-500">分差: <span class="font-semibold text-blue-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                            <a href="/schools/<%= s.sch_id || '' %>" class="text-blue-500 hover:underline">详情 →</a>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+            </div>
+            <% } %>
+        </section>
+        <% } %>
 
+        <!-- 保一保学校列表 -->
+        <% if (schools.safe.length > 0) { %>
+        <section class="mb-6 md:mb-8">
+            <h2 class="text-lg md:text-xl font-bold text-green-600 mb-3 md:mb-4 flex items-center gap-2">
+                <span class="bg-green-100 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm">保</span>
+                保一保（<%= schools.safe.length %> 所）
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <% schools.safe.slice(0, 10).forEach(s => { %>
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                    <div class="flex items-start justify-between mb-2 md:mb-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base md:text-lg font-bold text-gray-800 truncate"><%= s.name %></h3>
+                            <div class="flex items-center gap-1 md:gap-2 mt-1 text-xs md:text-sm">
+                                <span class="text-gray-500"><%= s.province %></span>
+                                <span class="text-gray-400">|</span>
+                                <span class="text-gray-500 truncate"><%= s.department %></span>
+                            </div>
+                        </div>
+                        <div class="text-right ml-3">
+                            <div class="text-green-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                            <div class="text-xs text-gray-400">近年最低分</div>
+                        </div>
+                    </div>
+                    <% if (s.tags && s.tags.length) { %>
+                    <div class="flex flex-wrap gap-1 mb-2 md:mb-3">
+                        <% s.tags.forEach(t => { %>
+                        <span class="px-2 py-0.5 bg-green-50 text-green-600 text-xs rounded-full"><%= t %></span>
+                        <% }); %>
+                    </div>
+                    <% } %>
+                    <div class="flex items-center justify-between text-xs md:text-sm">
+                        <span class="text-gray-500">分差: <span class="font-semibold text-green-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                        <% if (s.satisfaction) { %>
+                        <span class="text-gray-500 hidden sm:inline">满意度: <span class="font-semibold"><%= s.satisfaction %></span></span>
+                        <% } %>
+                        <a href="/schools/<%= s.sch_id || '' %>" class="text-green-500 hover:underline">详情 →</a>
+                    </div>
+                    <% if (s.scores && s.scores.length) { %>
+                    <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-100">
+                        <div class="text-xs text-gray-400 mb-1 md:mb-2">历年录取分数线</div>
+                        <div class="flex gap-1 md:gap-2 flex-wrap">
+                            <% s.scores.slice(-4).forEach(sc => { %>
+                            <div class="bg-gray-50 rounded px-2 py-1 text-xs">
+                                <span class="text-gray-500"><%= sc.year %></span>
+                                <span class="font-semibold ml-1"><%= sc.min_score %></span>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <% }); %>
+            </div>
+            <% if (schools.safe.length > 10) { %>
+            <div class="text-center mt-3 md:mt-4">
+                <button onclick="toggleMore('safe')" class="text-green-500 hover:text-green-700 text-sm">查看更多</button>
+                <div id="extra-safe" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
+                    <% schools.safe.slice(10).forEach(s => { %>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition p-4 md:p-5 school-card">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <h3 class="text-base md:text-lg font-bold text-gray-800"><%= s.name %></h3>
+                                <div class="flex items-center gap-2 mt-1 text-xs md:text-sm">
+                                    <span class="text-gray-500"><%= s.province %></span>
+                                    <span class="text-gray-400">|</span>
+                                    <span class="text-gray-500"><%= s.department %></span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-green-600 font-bold text-lg md:text-xl"><%= s.avg_min_score %></div>
+                                <div class="text-xs text-gray-400">近年最低分</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs md:text-sm">
+                            <span class="text-gray-500">分差: <span class="font-semibold text-green-600"><%= s.diff > 0 ? '+' : '' %><%= s.diff %></span></span>
+                            <a href="/schools/<%= s.sch_id || '' %>" class="text-green-500 hover:underline">详情 →</a>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+            </div>
+            <% } %>
+        </section>
+        <% } %>
+
+        <!-- AI 分析报告 -->
         <div class="mt-8 md:mt-10 bg-white rounded-2xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-4 md:px-6 py-3 md:py-4">
                 <h2 class="text-base md:text-lg font-bold text-white flex items-center gap-2">🤖 AI 综合分析报告</h2>
@@ -182,7 +367,7 @@
     function toggleMore(cat) {
         const el = document.getElementById('extra-' + cat);
         el.classList.toggle('hidden');
-        const btn = el.previousElementSibling.querySelector('button');
+        const btn = el.parentElement.querySelector('button');
         btn.textContent = el.classList.contains('hidden') ? '查看更多' : '收起';
     }
     </script>

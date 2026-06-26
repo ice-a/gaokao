@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     res.render('stats', { stats, provinces, departments, examData });
   } catch (e) {
     console.error('统计页错误:', e);
-    res.status(500).send('加载失败: ' + e.message);
+    res.status(503).render('error', { message: '数据加载失败: ' + e.message, path: '/stats' });
   }
 });
 

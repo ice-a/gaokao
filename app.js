@@ -42,8 +42,34 @@ function hashPassword(pwd) {
 
 const hashedPassword = hashPassword(config.auth.password);
 
+// 数据库连接状态
+let dbConnected = false;
+
+async function checkDbConnection() {
+  try {
+    const dbService = require('./services/db');
+    const { db } = await dbService.getClient();
+    await db.command({ ping: 1 });
+    dbConnected = true;
+    console.log(' MongoDB 连接成功');
+  } catch (e) {
+    dbConnected = false;
+    console.error('MongoDB 连接失败:', e.message);
+  }
+}
+
+// 启动时检查数据库连接
+checkDbConnection();
+// 每 30 秒检查一次
+setInterval(checkDbConnection, 30000);
+
+// 数据库健康检查端点
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', env: process.env.VERCEL ? 'vercel' : 'local' });
+  res.json({
+    status: dbConnected ? 'ok' : 'degraded',
+    db: dbConnected ? 'connected' : 'disconnected',
+    env: process.env.VERCEL ? 'vercel' : 'local'
+  });
 });
 
 const indexRouter = require('./routes/index');
@@ -104,6 +130,17 @@ app.use('/', indexRouter);
 app.use('/schools', schoolsRouter);
 app.use('/stats', statsRouter);
 app.use('/compare', compareRouter);
+
+// 数据库断开时的友好提示
+app.use((req, res, next) => {
+  if (!dbConnected && !req.path.startsWith('/api/') && req.path !== '/login') {
+    return res.status(503).render('error', {
+      message: '数据库连接中，请稍后刷新重试',
+      path: req.path,
+    });
+  }
+  next();
+});
 
 app.use((req, res) => {
   try {

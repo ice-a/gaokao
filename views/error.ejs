@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>提示 - 高考志愿填报分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+    <div class="text-center px-6">
+        <div class="text-6xl mb-6">⚠️</div>
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-3">服务暂时不可用</h1>
+        <p class="text-gray-500 mb-6 text-sm md:text-base max-w-md mx-auto"><%= message %></p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition">
+                刷新重试
+            </button>
+            <a href="/" class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 transition">
+                返回首页
+            </a>
+        </div>
+        <p class="text-gray-400 text-xs mt-6">如果是数据库问题，请检查 MongoDB 服务是否正常运行</p>
+    </div>
+</body>
+</html>

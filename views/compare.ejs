@@ -119,6 +119,7 @@
         <% } %>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
     let selectedIds = '<%= ids.join(',') %>'.split(',').filter(Boolean);
 
@@ -172,7 +173,12 @@
         const container = document.getElementById('aiResult');
         const content = document.getElementById('aiContent');
         container.classList.remove('hidden');
-        content.innerHTML = (data.analysis || data.error || '分析失败').replace(/\n/g, '<br>');
+        // 使用 marked 渲染 markdown
+        if (data.analysis) {
+            content.innerHTML = marked.parse(data.analysis, { breaks: true, gfm: true });
+        } else {
+            content.innerHTML = '<p class="text-red-500">' + (data.error || '分析失败') + '</p>';
+        }
         btn.disabled = false;
         btn.textContent = '🤖 AI 对比分析';
         btn.classList.remove('opacity-70');

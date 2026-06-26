@@ -4,19 +4,43 @@ const config = require('../config');
 let client;
 let db;
 let schools;
+let connecting = false;
+let lastError = null;
 
 async function getClient() {
-  if (!client) {
+  if (client && schools) {
+    return { client, db, schools };
+  }
+
+  if (connecting) {
+    // 等待正在进行的连接
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (client && schools) return { client, db, schools };
+    throw new Error(lastError || '数据库连接中');
+  }
+
+  connecting = true;
+  try {
     client = new MongoClient(config.mongo.uri, {
-      maxPoolSize: 1,
+      maxPoolSize: 5,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
     });
     await client.connect();
     db = client.db(config.mongo.db);
     schools = db.collection(config.mongo.collection);
+    lastError = null;
+    return { client, db, schools };
+  } catch (e) {
+    lastError = e.message;
+    client = null;
+    db = null;
+    schools = null;
+    throw e;
+  } finally {
+    connecting = false;
   }
-  return { client, db, schools };
 }
 
 async function getSchools() {
